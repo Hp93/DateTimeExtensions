@@ -16,11 +16,11 @@ namespace DateTimeExtensions.Tests
         #region test cases
         private static readonly List<DateTime> HungKingsCases = new List<DateTime>()
             {
-                new DateTime(2015,3,10),
-                new DateTime(2112,3,10),
-                new DateTime(2014,3,10),
-                new DateTime(2022,3,10),
-                new DateTime(2017,3,10),
+                new DateTime(2014,4,9),
+                new DateTime(2022,4,10),
+                new DateTime(2025,4,7),
+                new DateTime(2025,4,7),
+                new DateTime(2033,4,9),
             };
 
         private static readonly List<DateTime> LiberationCases = new List<DateTime>()

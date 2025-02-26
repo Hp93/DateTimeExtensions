@@ -19,12 +19,17 @@
 #endregion
 
 using DateTimeExtensions.Common;
+using System.Collections.Generic;
+using System;
+using System.Globalization;
 
 namespace DateTimeExtensions.WorkingDays.CultureStrategies
 {
     [Locale("vi-VN")]
     public class ViVNHolidayStrategy : HolidayStrategyBase
     {
+        private static readonly Calendar LunisolarCalendar = new ChineseLunisolarCalendar();
+
         public ViVNHolidayStrategy()
         {
             this.InnerHolidays.Add(HungKingsCommemorations);
@@ -34,6 +39,32 @@ namespace DateTimeExtensions.WorkingDays.CultureStrategies
             this.InnerHolidays.Add(NewYear);
         }
 
+        protected override IDictionary<DateTime, Holiday> BuildObservancesMap(int year)
+        {
+            IDictionary<DateTime, Holiday> holidayMap = new Dictionary<DateTime, Holiday>();
+            foreach (var innerHoliday in InnerHolidays)
+            {
+                var date = innerHoliday.GetInstance(year);
+                if (date.HasValue)
+                {
+                    //if the holiday is a saturday, the holiday is observed on previous friday
+                    switch (date.Value.DayOfWeek)
+                    {
+                        case DayOfWeek.Saturday:
+                            holidayMap.Add(date.Value.AddDays(-1), innerHoliday);
+                            break;
+                        case DayOfWeek.Sunday:
+                            holidayMap.Add(date.Value.AddDays(1), innerHoliday);
+                            break;
+                        default:
+                            holidayMap.Add(date.Value, innerHoliday);
+                            break;
+                    }
+                }
+            }
+            return holidayMap;
+        }
+
         private static Holiday hungKingsCommemorations;
         public static Holiday HungKingsCommemorations
         {
@@ -41,7 +72,7 @@ namespace DateTimeExtensions.WorkingDays.CultureStrategies
             {
                 if (hungKingsCommemorations == null)
                 {
-                    hungKingsCommemorations = new FixedHoliday("HungKingsCommemorations", 3, 10);
+                    hungKingsCommemorations = new FixedHoliday("HungKingsCommemorations", 3, 10, LunisolarCalendar);
                 }
                 return hungKingsCommemorations;
             }
@@ -91,7 +122,7 @@ namespace DateTimeExtensions.WorkingDays.CultureStrategies
         {
             get
             {
-                if (newYear==null)
+                if (newYear == null)
                 {
                     newYear = new FixedHoliday("NewYear", 1, 1);
                 }
